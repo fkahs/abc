@@ -158,3 +158,30 @@ window.addEventListener('keydown', (e) => {
 
 // 마지막에 실행!
 frame();
+
+// 9. 컨트롤 이벤트 (키보드 + 모바일 터치 통합)
+function handleControl(e) {
+    // 모바일 터치 시 화면이 위아래로 굴러가는 것 방지
+    if (e.type === 'touchstart') {
+        // e.preventDefault(); // 필요 시 활성화 (브라우저에 따라 차이 있음)
+    }
+
+    if (gameState === 'playing' && dino.y === 150) {
+        isJumping = true;
+    } else if (gameState === 'gameOver') {
+        resetGame();
+    }
+}
+
+// 키보드 스페이스바 지원
+window.addEventListener('keydown', (e) => {
+    if (e.code === 'Space') handleControl(e);
+});
+
+// 모바일 터치 지원 (화면 전체 터치)
+window.addEventListener('touchstart', handleControl);
+
+// 마우스 클릭도 지원하고 싶다면 추가
+window.addEventListener('mousedown', (e) => {
+    if (e.button === 0) handleControl(e); // 왼쪽 클릭
+});
