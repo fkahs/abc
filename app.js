@@ -1,4 +1,3 @@
-// 변수 선언은 맨 위에 한 번만!
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
@@ -37,7 +36,7 @@ class Obstacle {
     }
 }
 
-// 3. 메인 루프 (함수 정의)
+// 3. 메인 게임 루프
 function frame() {
     if (gameState === 'gameOver') return;
 
@@ -77,20 +76,15 @@ function frame() {
     dino.draw();
 }
 
-// 4. 점프 로직
-// 4. 점프 로직 (속도 및 높이 강화)
+// 4. 점프 로직 (속도 강화 버전)
 function handleJump() {
     if (isJumping) {
-        // 기존 5에서 8로 상향: 더 빠르게 튀어 오릅니다.
         dino.y -= 8; 
         jumpTimer++;
     } else if (dino.y < 150) {
-        // 하강 속도도 8로 맞춰야 착지가 어색하지 않습니다.
         dino.y += 8; 
     }
     
-    // 속도가 빨라졌으므로 체공 시간을 살짝 줄여야 적당한 높이에서 떨어집니다.
-    // (이 숫자가 너무 크면 하늘로 솟구쳐요!)
     if (jumpTimer > 25) { 
         isJumping = false;
         jumpTimer = 0;
@@ -104,7 +98,7 @@ function drawScore() {
     ctx.textAlign = 'left';
     ctx.fillText(`SCORE: ${score}`, 20, 35);
     ctx.fillStyle = '#888';
-    ctx.fillText(`HI-SCORE: ${highScore}`, 20, 60);
+    ctx.fillText(`HI: ${highScore}`, 20, 60);
 }
 
 // 6. 충돌 체크
@@ -130,7 +124,7 @@ function drawGameOverScreen() {
     ctx.font = '20px sans-serif';
     ctx.fillText(`Final Score: ${score}`, canvas.width / 2, canvas.height / 2 + 20);
     ctx.fillStyle = '#ffcc00';
-    ctx.fillText('Press Space to Restart', canvas.width / 2, canvas.height / 2 + 65);
+    ctx.fillText('Touch/Space to Restart', canvas.width / 2, canvas.height / 2 + 65);
 }
 
 // 8. 리셋 기능
@@ -145,25 +139,14 @@ function resetGame() {
     frame();
 }
 
-// 9. 키 이벤트
-window.addEventListener('keydown', (e) => {
-    if (e.code === 'Space') {
-        if (gameState === 'playing' && dino.y === 150) {
-            isJumping = true;
-        } else if (gameState === 'gameOver') {
-            resetGame();
-        }
-    }
-});
-
-// 마지막에 실행!
-frame();
-
-// 9. 컨트롤 이벤트 (키보드 + 모바일 터치 통합)
+// 9. 컨트롤 이벤트 통합 처리
 function handleControl(e) {
-    // 모바일 터치 시 화면이 위아래로 굴러가는 것 방지
+    // 키보드인 경우 스페이스바가 아니면 무시
+    if (e.type === 'keydown' && e.code !== 'Space') return;
+    
+    // 모바일 터치 시 화면 스크롤/확대 방지
     if (e.type === 'touchstart') {
-        // e.preventDefault(); // 필요 시 활성화 (브라우저에 따라 차이 있음)
+        if (e.cancelable) e.preventDefault();
     }
 
     if (gameState === 'playing' && dino.y === 150) {
@@ -173,15 +156,12 @@ function handleControl(e) {
     }
 }
 
-// 키보드 스페이스바 지원
-window.addEventListener('keydown', (e) => {
-    if (e.code === 'Space') handleControl(e);
-});
-
-// 모바일 터치 지원 (화면 전체 터치)
-window.addEventListener('touchstart', handleControl);
-
-// 마우스 클릭도 지원하고 싶다면 추가
+// 이벤트 등록
+window.addEventListener('keydown', handleControl);
+window.addEventListener('touchstart', handleControl, { passive: false });
 window.addEventListener('mousedown', (e) => {
-    if (e.button === 0) handleControl(e); // 왼쪽 클릭
+    if (e.button === 0) handleControl(e);
 });
+
+// 시작 실행 (단 한 번만 호출)
+frame();

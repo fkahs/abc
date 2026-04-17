@@ -2,35 +2,38 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Jump Game!</title>
     <style>
-        body { text-align: center; background: #f0f0f0; font-family: sans-serif; }
-        canvas { background: #fff; border: 2px solid #333; margin-top: 20px; }
+        body { 
+            text-align: center; 
+            background: #f0f0f0; 
+            font-family: sans-serif; 
+            margin: 0; 
+            overflow: hidden; /* 모바일 스크롤 방지 */
+            touch-action: manipulation; /* 더블탭 줌 방지 */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 { margin-top: 20px; font-size: 24px; color: #333; }
+        canvas { 
+            background: #fff; 
+            border: 2px solid #333; 
+            display: block;
+            margin: 10px auto;
+            max-width: 95%; /* 모바일 화면 옆 여백 확보 */
+            height: auto; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        p { font-size: 16px; color: #666; font-weight: bold; }
     </style>
 </head>
 <body>
     <h1>Jump Game!</h1>
     <canvas id="gameCanvas" width="800" height="200"></canvas>
-    <p>스페이스바를 눌러 점프하세요!</p>
+    <p>터치하거나 스페이스바를 눌러 점프!</p>
 
     <script src="app.js"></script>
 </body>
 </html>
-<style>
-    body { 
-        text-align: center; 
-        background: #f0f0f0; 
-        font-family: sans-serif; 
-        margin: 0; 
-        overflow: hidden; /* 화면 밖 스크롤 방지 */
-        touch-action: manipulation; /* 더블탭 줌 방지 */
-    }
-    canvas { 
-        background: #fff; 
-        border-bottom: 2px solid #333; 
-        max-width: 100%; /* 화면 너비에 맞게 조절 */
-        height: auto; 
-    }
-    h1 { margin-top: 10px; font-size: 20px; }
-    p { font-size: 14px; color: #666; }
-</style>
