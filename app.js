@@ -1,6 +1,7 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
+// --- 게임 변수 설정 ---
 let timer = 0;
 let obstacles = [];
 let jumpTimer = 0;
@@ -8,7 +9,9 @@ let animation;
 let isJumping = false;
 let gameState = 'playing';
 let score = 0;
-let highScore = 0;
+
+// [저장기능] 브라우저 저장소에서 최고 기록 불러오기 (없으면 0)
+let highScore = localStorage.getItem('dino_highScore') || 0;
 
 // 1. 캐릭터 설정
 const dino = {
@@ -46,28 +49,27 @@ function frame() {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // 바닥 선
+    // 바닥 선 그리기
     ctx.beginPath();
     ctx.moveTo(0, 190);
-    ctx.lineTo(800, 190);
+    ctx.lineTo(canvas.width, 190);
     ctx.strokeStyle = '#333';
     ctx.stroke();
 
     drawScore();
 
+    // 장애물 생성 (100프레임마다)
     if (timer % 100 === 0) {
         obstacles.push(new Obstacle());
     }
 
+    // 장애물 이동 및 충돌 체크
     obstacles.forEach((a, i, o) => {
         if (a.x < -50) o.splice(i, 1);
         a.x -= 6; 
         
         if (checkCollision(dino, a)) {
-            gameState = 'gameOver';
-            if (score > highScore) highScore = score;
-            cancelAnimationFrame(animation);
-            drawGameOverScreen();
+            endGame(); // 게임 종료 로직 실행
         }
         a.draw();
     });
@@ -76,7 +78,7 @@ function frame() {
     dino.draw();
 }
 
-// 4. 점프 로직 (속도 강화 버전)
+// 4. 점프 로직
 function handleJump() {
     if (isJumping) {
         dino.y -= 8; 
@@ -98,7 +100,7 @@ function drawScore() {
     ctx.textAlign = 'left';
     ctx.fillText(`SCORE: ${score}`, 20, 35);
     ctx.fillStyle = '#888';
-    ctx.fillText(`HI: ${highScore}`, 20, 60);
+    ctx.fillText(`HI: ${highScore}`, 20, 60); // 최고기록 표시
 }
 
 // 6. 충돌 체크
@@ -111,7 +113,21 @@ function checkCollision(dino, obs) {
     );
 }
 
-// 7. 게임오버 화면
+// 7. 게임 종료 로직
+function endGame() {
+    gameState = 'gameOver';
+    
+    // 최고 기록 갱신 및 저장
+    if (score > highScore) {
+        highScore = score;
+        localStorage.setItem('dino_highScore', highScore);
+    }
+    
+    cancelAnimationFrame(animation);
+    drawGameOverScreen();
+}
+
+// 8. 게임오버 화면 UI
 function drawGameOverScreen() {
     ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -127,7 +143,7 @@ function drawGameOverScreen() {
     ctx.fillText('Touch/Space to Restart', canvas.width / 2, canvas.height / 2 + 65);
 }
 
-// 8. 리셋 기능
+// 9. 리셋 기능
 function resetGame() {
     timer = 0;
     score = 0;
@@ -139,14 +155,13 @@ function resetGame() {
     frame();
 }
 
-// 9. 컨트롤 이벤트 통합 처리
+// 10. 컨트롤 이벤트 통합 (키보드, 터치, 클릭)
 function handleControl(e) {
-    // 키보드인 경우 스페이스바가 아니면 무시
     if (e.type === 'keydown' && e.code !== 'Space') return;
     
-    // 모바일 터치 시 화면 스크롤/확대 방지
-    if (e.type === 'touchstart') {
-        if (e.cancelable) e.preventDefault();
+    // 터치 시 스크롤 방지
+    if (e.type === 'touchstart' && e.cancelable) {
+        e.preventDefault();
     }
 
     if (gameState === 'playing' && dino.y === 150) {
@@ -156,12 +171,12 @@ function handleControl(e) {
     }
 }
 
-// 이벤트 등록
+// 이벤트 리스너 등록
 window.addEventListener('keydown', handleControl);
 window.addEventListener('touchstart', handleControl, { passive: false });
 window.addEventListener('mousedown', (e) => {
     if (e.button === 0) handleControl(e);
 });
 
-// 시작 실행 (단 한 번만 호출)
+// 게임 시작!
 frame();
